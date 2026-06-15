@@ -1,0 +1,45 @@
+app.post("/create-checkout-session", async (req, res) => {
+  const { plano } = req.body;
+
+  let price = 1900;
+  let productName = "Plano Basic";
+
+  if (plano === "pro") {
+    price = 4900;
+    productName = "Plano Pro";
+  }
+
+  if (plano === "premium") {
+    price = 9900;
+    productName = "Plano Premium";
+  }
+
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      mode: "subscription",
+      line_items: [
+        {
+          price_data: {
+            currency: "brl",
+            product_data: {
+              name: productName,
+            },
+            unit_amount: price,
+            recurring: {
+              interval: "month",
+            },
+          },
+          quantity: 1,
+        },
+      ],
+      success_url: "http://localhost:5173?success=true",
+      cancel_url: "http://localhost:5173?cancel=true",
+    });
+
+    res.json({ id: session.id });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: "Erro Stripe" });
+  }
+});
