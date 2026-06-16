@@ -1,4 +1,5 @@
 require("dotenv").config();
+
 console.log(
   "STRIPE_SECRET_KEY:",
   process.env.STRIPE_SECRET_KEY
@@ -49,6 +50,8 @@ app.post(
           process.env
             .STRIPE_WEBHOOK_SECRET
         );
+console.log("WEBHOOK RECEBIDO:");
+console.log(event.type);
     } catch (err) {
       console.log(
         "ERRO WEBHOOK:"
