@@ -15,6 +15,26 @@ console.log("================================");
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 });
+const admin = require("firebase-admin");
+
+const serviceAccount = require("./serviceAccountKey.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+console.log("TESTANDO FIREBASE...");
+
+admin
+  .auth()
+  .listUsers(1)
+  .then(() => {
+    console.log("FIREBASE AUTH OK");
+  })
+  .catch((err) => {
+    console.log("FIREBASE AUTH ERRO:");
+    console.log(err);
+  });
 
 const db = admin.firestore();
 
