@@ -13,6 +13,7 @@ console.log(
     ? "OK"
     : "UNDEFINED"
 );
+
 const express = require("express");
 const cors = require("cors");
 const Stripe = require("stripe");
@@ -37,12 +38,32 @@ app.post(
     type: "application/json",
   }),
   async (req, res) => {
+
     const signature =
       req.headers["stripe-signature"];
 
     let event;
 
     try {
+
+      console.log("===== WEBHOOK =====");
+
+      console.log("SIGNATURE:");
+      console.log(signature);
+
+      console.log("BODY TYPE:");
+      console.log(typeof req.body);
+
+      console.log("BODY:");
+      console.log(req.body);
+
+      console.log(
+        "WEBHOOK SECRET:"
+      );
+      console.log(
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+
       event =
         stripe.webhooks.constructEvent(
           req.body,
@@ -50,13 +71,23 @@ app.post(
           process.env
             .STRIPE_WEBHOOK_SECRET
         );
-console.log("WEBHOOK RECEBIDO:");
-console.log(event.type);
+
+      console.log(
+        "EVENTO RECEBIDO:"
+      );
+      console.log(
+        event.type
+      );
+
     } catch (err) {
+
       console.log(
         "ERRO WEBHOOK:"
       );
-      console.log(err.message);
+
+      console.log(
+        err.message
+      );
 
       return res
         .status(400)
@@ -70,6 +101,7 @@ console.log(event.type);
       "checkout.session.completed"
     ) {
       try {
+
         const session =
           event.data.object;
 
@@ -79,18 +111,22 @@ console.log(event.type);
         console.log(
           "================================"
         );
+
         console.log(
           "PAGAMENTO APROVADO"
         );
+
         console.log(
           "UID:",
           uid
         );
+
         console.log(
           "================================"
         );
 
         if (uid) {
+
           await db
             .collection("users")
             .doc(uid)
@@ -101,12 +137,25 @@ console.log(event.type);
           console.log(
             "USUARIO ATUALIZADO PARA PRO"
           );
+
+        } else {
+
+          console.log(
+            "UID NÃO ENCONTRADO NO METADATA"
+          );
+
         }
+
       } catch (err) {
+
         console.log(
           "ERRO FIRESTORE:"
         );
-        console.log(err);
+
+        console.log(
+          err
+        );
+
       }
     }
 
@@ -130,6 +179,7 @@ app.post(
   "/create-checkout-session",
   async (req, res) => {
     try {
+
       const {
         uid,
         email,
@@ -138,54 +188,57 @@ app.post(
       console.log(
         "================================"
       );
+
       console.log(
         "CRIANDO CHECKOUT"
       );
+
       console.log(
         "UID:",
         uid
       );
+
       console.log(
         "EMAIL:",
         email
       );
+
       console.log(
         "================================"
       );
 
       const session =
-        await stripe.checkout.sessions.create(
-          {
-            mode:
-              "subscription",
+        await stripe.checkout.sessions.create({
+          mode:
+            "subscription",
 
-            customer_email:
-              email,
+          customer_email:
+            email,
 
-            metadata: {
-              uid:
-                uid || "",
+          metadata: {
+            uid:
+              uid || "",
+          },
+
+          line_items: [
+            {
+              price:
+                "price_1TibL29WTqacWr6iR6uVBdL9",
+              quantity: 1,
             },
+          ],
 
-            line_items: [
-              {
-                price:
-                  "price_1TibL29WTqacWr6iR6uVBdL9",
-                quantity: 1,
-              },
-            ],
+          success_url:
+            "http://localhost:5173?success=true",
 
-            success_url:
-              "http://localhost:5173?success=true",
-
-            cancel_url:
-              "http://localhost:5173?cancel=true",
-          }
-        );
+          cancel_url:
+            "http://localhost:5173?cancel=true",
+        });
 
       console.log(
         "CHECKOUT:"
       );
+
       console.log(
         session.url
       );
@@ -194,14 +247,21 @@ app.post(
         url:
           session.url,
       });
+
     } catch (err) {
+
       console.log(
         "================================"
       );
+
       console.log(
         "ERRO STRIPE"
       );
-      console.log(err);
+
+      console.log(
+        err
+      );
+
       console.log(
         "================================"
       );
